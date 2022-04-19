@@ -1,3 +1,5 @@
+## Hand Tracker Controller for robotic manipulator control
+
 import cv2
 import time
 cap = cv2.VideoCapture(0)
