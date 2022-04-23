@@ -1,4 +1,7 @@
 ## Hand Tracker Controller for robotic manipulator control
+# resolve the function issue: https://github.com/google/mediapipe/issues/2818
+# code mainly comes from the tutorial: https://www.analyticsvidhya.com/blog/2021/07/building-a-hand-tracking-system-using-opencv/
+# mediapipe documentation: https://google.github.io/mediapipe/getting_started/hello_world_cpp.html
 
 import cv2
 import mediapipe as mp
