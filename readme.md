@@ -1,4 +1,4 @@
-# Hand Tracker Controller for robotic manipulator control
+# Hand Tracker Controller for Robotic Manipulator Control
 Computer vision for robotic manipulartor control
 
 - code mainly comes from the tutorial: https://www.analyticsvidhya.com/blog/2021/07/building-a-hand-tracking-system-using-opencv/
@@ -6,5 +6,5 @@ Computer vision for robotic manipulartor control
 
 Notes
 ===============================
-https://github.com/google/mediapipe/issues/2818
+https://github.com/google/mediapipe/issues/2818 <br>
 An issue would occur with the code from the analyticsvidhya code where an incorrect argument was being passed to the `mpHands.Hands` function. To resolve, the `modelCom` or model complexity parameter was added
