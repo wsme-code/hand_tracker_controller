@@ -1,10 +1,11 @@
 ## Hand Tracker Controller for robotic manipulator control
 # resolve the function issue: https://github.com/google/mediapipe/issues/2818
 # code mainly comes from the tutorial: https://www.analyticsvidhya.com/blog/2021/07/building-a-hand-tracking-system-using-opencv/
-# mediapipe documentation: https://google.github.io/mediapipe/getting_started/hello_world_cpp.html
+# mediapipe documentation: https://google.github.io/mediapipe/solutions/hands#python-solution-api
 
 import cv2
 import mediapipe as mp
+import numpy as np
 import time
 class handDetector():
     def __init__(self, mode = False, maxHands = 2, modelCom = 1, detectionCon = 0.5, trackCon = 0.5):
@@ -42,18 +43,53 @@ class handDetector():
                     cv2.circle(img, (cx, cy), 3, (255, 0, 255), cv2.FILLED)
         return lmlist
 
+class actuationSensor():
+    def __init__(self):
+        self.isAvgObtained = 0
+        self.i = 0
+        self.avgMaxActuationDist = 0
+
+    ## get the maximum actuation distance
+    # checks if first iteration and gets the starting time of the recording
+    # eventually take an argument for what finger to detect
+    def getMaxActuationDistance(self, lmlist):
+        if (self.i == 0):
+            self.startTime = time.time()
+            self.i += 1
+            self.maxActuationDistArray = np.array([])
+
+        # checks if 5 seconds have passed
+        if ((time.time() - self.startTime) < 5):
+            if (self.i == 0):
+                self.maxActuationDistArray[0] = abs(lmlist[8][1] - lmlist[5][1])
+            else:
+                self.maxActuationDistArray = np.append(self.maxActuationDistArray, abs(lmlist[8][1] - lmlist[5][1]))
+        else:
+            self.avgMaxActuationDist = np.average(self.maxActuationDistArray)
+            self.isAvgObtained = 1
+
 def main():
     pTime = 0
     cTime = 0
     cap = cv2.VideoCapture(0)
     detector = handDetector()
+    hand = actuationSensor()
 
     while True:
         success, img = cap.read()
         img = detector.findHands(img)
         lmlist = detector.findPosition(img)
+        # prints the coordinates of the Landmark with the ID passed to lmlist
         if len(lmlist) != 0:
-            print(lmlist[4])
+            print(lmlist[0])
+
+                ## start of distance sensing code
+        # sense right hand index finger contraction
+        if len(lmlist) != 0:
+            hand.getMaxActuationDistance(lmlist)
+            if (hand.isAvgObtained == 1):
+                contraction = abs(lmlist[8][1] - lmlist[5][1]) / hand.avgMaxActuationDist
+                print("Contraction distance is: " + str(contraction))
 
         cTime = time.time()
         fps = 1 / (cTime - pTime)
@@ -63,6 +99,7 @@ def main():
 
         cv2.imshow("Image", img)
         cv2.waitKey(1)
+
 
 
 if __name__ == "__main__":
