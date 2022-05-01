@@ -55,18 +55,18 @@ class actuationSensor():
     def getMaxActuationDistance(self, lmlist):
         if (self.i == 0):
             self.startTime = time.time()
-            self.i += 1
             self.maxActuationDistArray = np.array([])
 
         # checks if 5 seconds have passed
         if ((time.time() - self.startTime) < 5):
-            if (self.i == 0):
-                self.maxActuationDistArray[0] = abs(lmlist[8][1] - lmlist[5][1])
-            else:
-                self.maxActuationDistArray = np.append(self.maxActuationDistArray, abs(lmlist[8][1] - lmlist[5][1]))
+            self.maxActuationDistArray = np.append(self.maxActuationDistArray, abs(lmlist[8][2] - lmlist[5][2]))
+            print(str(self.maxActuationDistArray[self.i]))
+
         else:
             self.avgMaxActuationDist = np.average(self.maxActuationDistArray)
+            print(str(self.avgMaxActuationDist))
             self.isAvgObtained = 1
+        self.i += 1
 
 def main():
     pTime = 0
@@ -83,12 +83,12 @@ def main():
         if len(lmlist) != 0:
             print(lmlist[0])
 
-                ## start of distance sensing code
+        ## start of distance sensing code
         # sense right hand index finger contraction
         if len(lmlist) != 0:
             hand.getMaxActuationDistance(lmlist)
             if (hand.isAvgObtained == 1):
-                contraction = abs(lmlist[8][1] - lmlist[5][1]) / hand.avgMaxActuationDist
+                contraction = abs(lmlist[8][2] - lmlist[5][2]) / hand.avgMaxActuationDist
                 print("Contraction distance is: " + str(contraction))
 
         cTime = time.time()
