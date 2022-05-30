@@ -19,7 +19,7 @@ class handDetector():
         self.hands = self.mpHands.Hands(self.mode, self.maxHands, self.modelCom, self.detectionCon, self.trackCon)
         self.mpDraw = mp.solutions.drawing_utils
         
-    def findHands(self,img, draw = True):
+    def findHands(self, img, draw = True):
         imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         self.results = self.hands.process(imgRGB)
         # print(results.multi_hand_landmarks)
@@ -69,36 +69,22 @@ class actuationSensor():
         self.i += 1
 
 def main():
-    pTime = 0
-    cTime = 0
-    cap = cv2.VideoCapture(0)
     detector = handDetector()
     hand = actuationSensor()
+    render_im_path = "handRender.png"
 
-    while True:
-        success, img = cap.read()
-        img = detector.findHands(img)
-        lmlist = detector.findPosition(img)
-        # prints the coordinates of the Landmark with the ID passed to lmlist
-        if len(lmlist) != 0:
-            print(lmlist[0])
+    img = cv2.imread(render_im_path)
+    print(img)
+    cv2.imshow("Image", img)
 
-        ## start of distance sensing code
-        # sense right hand index finger contraction
-        if len(lmlist) != 0:
-            hand.getMaxActuationDistance(lmlist)
-            if (hand.isAvgObtained == 1):
-                contraction = abs(lmlist[8][2] - lmlist[5][2]) / hand.avgMaxActuationDist
-                print("Contraction distance is: " + str(contraction))
+    img = detector.findHands(img)
+    lmlist = detector.findPosition(img)
+    # prints the coordinates of the Landmark with the ID passed to lmlist
+    if len(lmlist) != 0:
+        print(lmlist[0])
 
-        cTime = time.time()
-        fps = 1 / (cTime - pTime)
-        pTime = cTime
-
-        cv2.putText(img, str(int(fps)), (10, 70), cv2.FONT_HERSHEY_PLAIN, 3, (255, 0, 255), 3)
-
-        cv2.imshow("Image", img)
-        cv2.waitKey(1)
+    cv2.imshow("Image", img)
+    cv2.waitKey(1)
 
 
 

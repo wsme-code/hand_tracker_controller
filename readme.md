@@ -6,5 +6,9 @@ Computer vision for robotic manipulartor control
 
 Notes
 ===============================
+5/29/2022
+Issue with protocol buffer after a google update on mediapipe. Resolved with `pip install --upgrade protobuf==3.20.0`
+
+Before 5/29/2022
 https://github.com/google/mediapipe/issues/2818 <br>
 An issue would occur with the code from the analyticsvidhya tutorial where an incorrect argument was being passed to the `mpHands.Hands` function. To resolve, the `modelCom` or model complexity parameter was added
