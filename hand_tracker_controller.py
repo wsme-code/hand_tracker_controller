@@ -71,10 +71,10 @@ class actuationSensor():
 def main():
     detector = handDetector()
     hand = actuationSensor()
-    render_im_path = "handRender.png"
+    render_im_path = "hand_tracker_controller/gloved_hand2.jpg"
 
     img = cv2.imread(render_im_path)
-    print(img)
+    #print(img)
     cv2.imshow("Image", img)
 
     img = detector.findHands(img)
@@ -84,9 +84,7 @@ def main():
         print(lmlist[0])
 
     cv2.imshow("Image", img)
-    cv2.waitKey(1)
-
-
+    cv2.waitKey(0)
 
 if __name__ == "__main__":
     main()
