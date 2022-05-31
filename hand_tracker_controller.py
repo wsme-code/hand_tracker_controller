@@ -2,11 +2,40 @@
 # resolve the function issue: https://github.com/google/mediapipe/issues/2818
 # code mainly comes from the tutorial: https://www.analyticsvidhya.com/blog/2021/07/building-a-hand-tracking-system-using-opencv/
 # mediapipe documentation: https://google.github.io/mediapipe/solutions/hands#python-solution-api
+# color thresholding from: https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
 
 import cv2
 import mediapipe as mp
 import numpy as np
 import time
+
+# detect colors
+# place marker on robot manipulator based on average of x and y values
+# maybe something to ignore outliers
+class manipulatorDetector():
+    def __init__(self):
+        self.img = 0
+
+    def findJoints(self, img):
+        # lists color boundaries for blue
+        # each color is configured in openCV's BGR color space
+        color_boundaries = [
+            ([255, 251, 246], [236, 168, 0]),
+        ]
+
+        # detect colors in image
+        for (lower, upper) in color_boundaries:
+            # create NumPy arrays from the boundaries
+            lower = np.array(lower, dtype = "uint8")
+            upper = np.array(upper, dtype = "uint8")
+            # find the colors within the specified boundaries and apply
+            # the mask
+            mask = cv2.inRange(self.img, lower, upper)
+            output = cv2.bitwise_and(self.img, self.img, mask = mask)
+            # show the images
+            cv2.imshow("images", np.hstack([self.img, output]))
+            cv2.waitKey(0)
+
 class handDetector():
     def __init__(self, mode = False, maxHands = 2, modelCom = 1, detectionCon = 0.5, trackCon = 0.5):
         self.mode = mode
@@ -69,22 +98,25 @@ class actuationSensor():
         self.i += 1
 
 def main():
+    manipulator = manipulatorDetector()
     detector = handDetector()
     hand = actuationSensor()
-    render_im_path = "hand_tracker_controller/gloved_hand2.jpg"
+    render_im_path = "gloved_hand2.jpg"
 
     img = cv2.imread(render_im_path)
     #print(img)
     cv2.imshow("Image", img)
 
-    img = detector.findHands(img)
-    lmlist = detector.findPosition(img)
-    # prints the coordinates of the Landmark with the ID passed to lmlist
-    if len(lmlist) != 0:
-        print(lmlist[0])
+    manipulator.findJoints(img)
 
-    cv2.imshow("Image", img)
-    cv2.waitKey(0)
+    # img = detector.findHands(img)
+    # lmlist = detector.findPosition(img)
+    # # prints the coordinates of the Landmark with the ID passed to lmlist
+    # if len(lmlist) != 0:
+    #     print(lmlist[0])
+
+    # cv2.imshow("Image", img)
+    # cv2.waitKey(0)
 
 if __name__ == "__main__":
     main()
