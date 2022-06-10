@@ -1,5 +1,5 @@
 # Hand Tracker Controller for Robotic Manipulator Control
-Computer vision for robotic manipulartor control
+Computer vision for robotic manipulator control
 
 - code mainly comes from the tutorial: https://www.analyticsvidhya.com/blog/2021/07/building-a-hand-tracking-system-using-opencv/
 - mediapipe documentation: https://google.github.io/mediapipe/solutions/hands#python-solution-api

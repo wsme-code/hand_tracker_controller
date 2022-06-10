@@ -5,6 +5,7 @@
 # color thresholding from: https://pyimagesearch.com/2014/08/04/opencv-python-color-detection/
 
 import cv2
+from matplotlib.colors import hsv_to_rgb
 import mediapipe as mp
 import numpy as np
 import time
@@ -16,25 +17,44 @@ class manipulatorDetector():
     def __init__(self):
         self.img = 0
 
-    def findJoints(self, img):
-        # lists color boundaries for blue
-        # each color is configured in openCV's BGR color space
-        color_boundaries = [
-            ([255, 251, 246], [236, 168, 0]),
-        ]
+    def findBlueJoint(self, img):
+        blue = np.uint8([[[255,250,240 ]]])
+        hsv_blue = cv2.cvtColor(blue,cv2.COLOR_BGR2HSV)
+        print( hsv_blue )
 
-        # detect colors in image
-        for (lower, upper) in color_boundaries:
-            # create NumPy arrays from the boundaries
-            lower = np.array(lower, dtype = "uint8")
-            upper = np.array(upper, dtype = "uint8")
-            # find the colors within the specified boundaries and apply
-            # the mask
-            mask = cv2.inRange(self.img, lower, upper)
-            output = cv2.bitwise_and(self.img, self.img, mask = mask)
-            # show the images
-            cv2.imshow("images", np.hstack([self.img, output]))
-            cv2.waitKey(0)
+        # Reading the image
+        img = cv2.imread('hand_tracker_controller/gloved_hand2.jpg')
+
+        # convert to hsv colorspace
+        hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
+        # lower bound and upper bound for Green color
+        # these values were determined using the color picker at the beginning of the code
+        # with some tolerance
+        lower_bound = np.array([95,  5, 210])   
+        upper_bound = np.array([105, 255, 255])
+
+        # find the colors within the boundaries
+        mask = cv2.inRange(hsv, lower_bound, upper_bound)
+
+        #define kernel size  
+        kernel = np.ones((7,7),np.uint8)
+
+        # Remove unnecessary noise from mask
+        mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+
+        # Segment only the detected region
+        segmented_img = cv2.bitwise_and(img, img, mask=mask)
+
+                # Find contours from the mask
+        contours, hierarchy = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        output = cv2.drawContours(segmented_img, contours, -1, (0, 0, 255), 3)
+
+        # Draw contour on original image
+        output = cv2.drawContours(img, contours, -1, (0, 0, 255), 3)
+
+        return segmented_img
 
 class handDetector():
     def __init__(self, mode = False, maxHands = 2, modelCom = 1, detectionCon = 0.5, trackCon = 0.5):
@@ -101,14 +121,17 @@ def main():
     manipulator = manipulatorDetector()
     detector = handDetector()
     hand = actuationSensor()
-    render_im_path = "gloved_hand2.jpg"
+    render_im_path = "hand_tracker_controller/gloved_hand2.jpg"
 
     img = cv2.imread(render_im_path)
     #print(img)
     cv2.imshow("Image", img)
 
-    manipulator.findJoints(img)
+    segmented_img = manipulator.findBlueJoint(img)
 
+    cv2.imshow("segmented", segmented_img)
+    cv2.waitKey(0)
+    
     # img = detector.findHands(img)
     # lmlist = detector.findPosition(img)
     # # prints the coordinates of the Landmark with the ID passed to lmlist
